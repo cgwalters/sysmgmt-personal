@@ -3,6 +3,30 @@ set -xeuo pipefail
 
 dn=$(cd $(dirname $0) && pwd)
 
+# Convert to ostree convention
+move_and_link() {
+    local src=$1
+    local dest=${2}
+    mv ${src} ${dest}
+    ln -sr ${dest} ${src}
+}
+redirect_var() {
+    local src=$1
+    local dest=${2:-${src}}
+    move_and_link /${src} /var/${dest}
+}
+redirect_var root roothome
+for x in mnt srv home; do
+    redirect_var ${x}
+done
+mv /usr/local /var/usrlocal && ln -sr /var/usrlocal /usr/local
+if test -d /var/lib/rpm; then
+    mkdir -p /usr/lib/sysimage
+    mv /var/lib/rpm /usr/lib/sysimage/rpm && ln -sr /usr/lib/sysimage/rpm /var/lib/rpm 
+    ln -sr /usr/lib/sysimage/rpm /usr/share/rpm
+fi
+
+
 # https://pagure.io/fedora-kickstarts/blob/a8e3bf46817ca30f0253b025fcd829a99b1eb708/f/fedora-docker-base.ks#_22
 for f in /etc/dnf/dnf.conf /etc/yum.conf; do
     if test -f ${f}; then
@@ -58,7 +82,7 @@ ${pkg_builddep} -y glib2 systemd
 if test "${OS_ID}" = fedora; then
     ${pkg_builddep} -y ostree rpm-ostree origin
 fi
-yum clean all
+yum clean all && rm /var/cache/{dnf,yum} -rf
 
 useradd walters -G wheel
 echo '%wheel ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers.d/wheel-nopasswd
