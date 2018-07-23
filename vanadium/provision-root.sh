@@ -16,12 +16,18 @@ EOF
 cat >/etc/krb5.conf.d/redhat <<EOF
 [libdefaults]
  default_realm = REDHAT.COM
+ ticket_lifetime = 24h
+ renew_lifetime = 7d
 
 [realms]
 REDHAT.COM = {
  kdc = kerberos.corp.redhat.com
  admin_server = kerberos.corp.redhat.com
 }
+
+[domain_realm]
+ .redhat.com = REDHAT.COM
+ redhat.com = REDHAT.COM
 EOF
 
 # https://pagure.io/atomic-wg/issue/505
