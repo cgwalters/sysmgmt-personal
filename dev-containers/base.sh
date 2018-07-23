@@ -22,10 +22,9 @@ done
 mv /usr/local /var/usrlocal && ln -sr /var/usrlocal /usr/local
 if test -d /var/lib/rpm; then
     mkdir -p /usr/lib/sysimage
-    mv /var/lib/rpm /usr/lib/sysimage/rpm && ln -sr /usr/lib/sysimage/rpm /var/lib/rpm 
+    mv /var/lib/rpm /usr/lib/sysimage/rpm && ln -sr /usr/lib/sysimage/rpm /var/lib/rpm
     ln -sr /usr/lib/sysimage/rpm /usr/share/rpm
 fi
-
 
 # https://pagure.io/fedora-kickstarts/blob/a8e3bf46817ca30f0253b025fcd829a99b1eb708/f/fedora-docker-base.ks#_22
 for f in /etc/dnf/dnf.conf /etc/yum.conf; do
@@ -44,6 +43,8 @@ override_repo="/usr/lib/container/repos/${OS_ID}-${OS_VER}.repo"
 if test -f "${override_repo}"; then
     cp --reflink=auto "${override_repo}" /etc/yum.repos.d
 fi
+
+yum -y update
 
 if test -x /usr/bin/dnf; then
     pkg_builddep="dnf builddep"
@@ -64,7 +65,7 @@ case "${OS_ID}-${OS_VER}" in
     rhel-7.*) yum -y install rhpkg;;
 esac
 
-pkgs="dumb-init bash-completion yum-utils tmux sudo \
+pkgs="dumb-init bash-completion tmux sudo \
      redhat-rpm-config make \
      libguestfs-tools strace libguestfs-xfs \
      virt-install curl git kernel rsync \
@@ -76,6 +77,9 @@ if test "${OS_ID}" = fedora; then
     pkgs="$pkgs parallel vagrant-libvirt ansible"
     pkgs="$pkgs "$(echo ostree{,-grub2} rpm-ostree)
     pkgs="$pkgs awscli"
+fi
+if ! test -x /usr/bin/dnf; then
+    pkgs="$pkgs yum-utils"
 fi
 yum -y install $pkgs
 ${pkg_builddep} -y glib2 systemd
