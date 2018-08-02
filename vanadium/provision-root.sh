@@ -4,6 +4,12 @@ set -xeuo pipefail
 # https://bugzilla.redhat.com/show_bug.cgi?id=1248916
 rm -f /etc/xdg/autostart/gnome-keyring-ssh.desktop
 
+# Disable short names, see https://bugzilla.redhat.com/show_bug.cgi?id=1434897#c7
+cat > /etc/containers/registries.conf <<EOF
+[registries.search]
+registries = []
+EOF
+
 cat >/etc/polkit-1/rules.d/polkit-libvirt.rules <<EOF
 // From https://goldmann.pl/blog/2012/12/03/configuring-polkit-in-fedora-18-to-access-virt-manager/
 polkit.addRule(function(action, subject) {

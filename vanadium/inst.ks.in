@@ -1,4 +1,5 @@
-# Colin's kickstart for Silverblue that 
+#--coreos-virt-install-disk-size-gb: 40
+# Colin's kickstart for Silverblue that
 # sets up a split / and /var with XFS reflink=1 enabled,
 # both ssh and password, and passwordless sudo.
 lang en_US.UTF-8
