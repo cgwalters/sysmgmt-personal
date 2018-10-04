@@ -82,7 +82,7 @@ if ! test -x /usr/bin/dnf; then
     pkgs="$pkgs yum-utils"
 fi
 yum -y install $pkgs
-${pkg_builddep} -y glib2 systemd
+${pkg_builddep} -y glib2 systemd kernel
 if test "${OS_ID}" = fedora; then
     ${pkg_builddep} -y ostree rpm-ostree origin
 fi
