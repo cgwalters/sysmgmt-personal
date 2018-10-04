@@ -88,6 +88,10 @@ if test "${OS_ID}" = fedora; then
 fi
 yum clean all && rm /var/cache/{dnf,yum} -rf
 
+if [ -f /etc/mock/site-defaults.cfg ]; then
+    echo "config_opts['use_nspawn'] = False" >> /etc/mock/site-defaults.cfg
+fi
+
 useradd walters -G wheel
 echo '%wheel ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers.d/wheel-nopasswd
 if rpm -q mock 2>/dev/null; then
