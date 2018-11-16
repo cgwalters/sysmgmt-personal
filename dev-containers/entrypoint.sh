@@ -20,6 +20,6 @@ fi
 # hurt interactivity for desktop apps.
 # ionice -c idle does the same for I/O.
 exec setpriv --reuid 1000 --regid 1000 --clear-groups -- env HOME=/home/walters \
-     chrt --idle 0 --\
-     inoice -c idle -- \
+     chrt --idle 0 \
+     ionice -c idle -- \
      dumb-init /usr/bin/tmux -l
