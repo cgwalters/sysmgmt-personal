@@ -85,6 +85,22 @@ yum -y install $pkgs
 ${pkg_builddep} -y glib2 systemd kernel
 if test "${OS_ID}" = fedora; then
     ${pkg_builddep} -y ostree rpm-ostree origin
+    # enable `dustymabe/ignition` copr
+	# pulled from https://copr.fedorainfracloud.org/coprs/dustymabe/ignition/repo/fedora-28/dustymabe-ignition-fedora-28.repo
+    cat > /etc/yum.repos.d/dustymabe-ignition-fedora-28.repo <<'EOF'
+[dustymabe-ignition]
+name=Copr repo for ignition owned by dustymabe
+baseurl=https://copr-be.cloud.fedoraproject.org/results/dustymabe/ignition/fedora-$releasever-$basearch/
+type=rpm-md
+skip_if_unavailable=True
+gpgcheck=1
+gpgkey=https://copr-be.cloud.fedoraproject.org/results/dustymabe/ignition/pubkey.gpg
+repo_gpgcheck=0
+enabled=1
+enabled_metadata=1
+EOF
+    curl https://raw.githubusercontent.com/coreos/coreos-assembler/master/src/deps.txt | \
+        grep -v '^#' | xargs yum -y install
 fi
 yum clean all && rm /var/cache/{dnf,yum} -rf
 
