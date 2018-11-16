@@ -15,4 +15,11 @@ if [ -e /sys/fs/selinux/status ]; then
         umount /sys/fs/selinux
     fi
 fi
-exec setpriv --reuid 1000 --regid 1000 --clear-groups -- env HOME=/home/walters chrt --idle 0 dumb-init /usr/bin/tmux -l
+# chrt --idle sets the CPU scheduling class to idle.  The main reason
+# to do this is so that e.g. `make -j 8` inside the container won't
+# hurt interactivity for desktop apps.
+# ionice -c idle does the same for I/O.
+exec setpriv --reuid 1000 --regid 1000 --clear-groups -- env HOME=/home/walters \
+     chrt --idle 0 --\
+     inoice -c idle -- \
+     dumb-init /usr/bin/tmux -l
