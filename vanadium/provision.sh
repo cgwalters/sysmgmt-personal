@@ -7,8 +7,6 @@ if ! test -f /run/ostree-booted; then
     echo "Not booted via ostree"
 fi
 
-sudo ${dn}/provision-root.sh
-
 cd /var/srv/${USER}
 mkdir -p public/src
 ln -sfr public/src ~/src
