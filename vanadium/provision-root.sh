@@ -1,6 +1,9 @@
 #!/usr/bin/bash
 set -xeuo pipefail
 
+rm -f /root/.bashrc
+cp --reflink=auto ~walters/.bash* /root/
+
 # https://bugzilla.redhat.com/show_bug.cgi?id=1248916
 rm -f /etc/xdg/autostart/gnome-keyring-ssh.desktop
 

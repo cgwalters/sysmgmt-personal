@@ -21,9 +21,6 @@ cd homegit
 rm -f ~/.bashrc
 ./install-config.sh ./install-dotfiles.sh
 
-sudo rm -f /root/.bashrc
-sudo cp --reflink=auto ~/.bash* /root/
-
 flatpak_install() {
     remote=$1
     app=$2
