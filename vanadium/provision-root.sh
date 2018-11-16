@@ -19,6 +19,10 @@ polkit.addRule(function(action, subject) {
 });
 EOF
 
+cat > /etc/sudoers.d/wheel <<EOF
+%wheel  ALL=NOPASSWD:/usr/bin/su,/usr/bin/setpriv,/usr/sbin/runuser
+EOF
+
 cat >/etc/krb5.conf.d/redhat <<EOF
 [libdefaults]
  default_realm = REDHAT.COM
