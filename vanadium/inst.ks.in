@@ -23,7 +23,7 @@ user --name=walters --groups=wheel --iscrypted --gecos "Colin Walters" --passwor
 sshkey --username walters "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOQkQHeKan3X+g1jILw4a3KtcfEIED0kByKGWookU7ev walters+2015-general@verbum.org"
 
 # Install from the ISO media
-ostreesetup --osname="sb" --remote="fedora" --url="file:///ostree/repo" --ref="fedora/28/x86_64/workstation" --nogpg
+ostreesetup --osname="sb" --remote="fedora" --url="file:///ostree/repo" --ref="fedora/29/x86_64/silverblue" --nogpg
 
 reboot
 
