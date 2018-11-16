@@ -19,7 +19,7 @@ if ! test -d homegit; then
 fi
 cd homegit
 rm -f ~/.bashrc
-make install install-config install-dotfiles
+./install-config.sh ./install-dotfiles.sh
 
 sudo rm -f /root/.bashrc
 sudo cp --reflink=auto ~/.bash* /root/
