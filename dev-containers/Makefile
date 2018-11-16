@@ -3,6 +3,9 @@ PREFIX ?= cgwalters
 f28:
 	./build.sh registry.fedoraproject.org/fedora:28 $(PREFIX)/fedora-dev 28
 
+f29:
+	./build.sh registry.fedoraproject.org/fedora:28 $(PREFIX)/fedora-dev 29
+
 rawhide:
 	./build.sh registry.fedoraproject.org/fedora:rawhide $(PREFIX)/fedora-dev rawhide
 
