@@ -70,7 +70,7 @@ pkgs="dumb-init bash-completion tmux sudo \
      libguestfs-tools strace libguestfs-xfs \
      virt-install curl git kernel rsync \
      gdb selinux-policy-targeted
-     createrepo_c"
+     createrepo_c libvirt-devel"
 if test "${OS_ID}" = fedora; then
     pkgs="$pkgs "$(echo {python3-,}dnf-plugins-core)
     pkgs="$pkgs jq gcc origin-clients standard-test-roles fedpkg mock awscli git-evtag cargo golang"
