@@ -1,9 +1,6 @@
 #!/usr/bin/bash
 set -xeuo pipefail
 
-rm -f /root/.bashrc
-cp --reflink=auto ~walters/.bash* /root/
-
 # https://bugzilla.redhat.com/show_bug.cgi?id=1248916
 rm -f /etc/xdg/autostart/gnome-keyring-ssh.desktop
 
@@ -47,9 +44,9 @@ EOF
 chcon system_u:object_r:container_file_t:s0 /var/srv
 
 # Store "large" data in basically a secondary home directory
-mkdir -p /var/srv/${USER}
-chown ${USER}:${USER} /var/srv/${USER}
-chcon --reference /home/${USER} /var/srv/${USER}
+mkdir -p /var/srv/walters
+chown walters:walters /var/srv/walters
+chcon --reference /home/walters /var/srv/walters
 
 pkgs="emacs fuse-sshfs git-evtag krb5-workstation libvirt-client opensc origin-clients pcsc-lite-ccid strace tmux vagrant-libvirt virt-manager xsel ykclient ykpers"
 status=$(rpm-ostree status)

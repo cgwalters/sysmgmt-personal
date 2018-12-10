@@ -21,6 +21,8 @@ cd homegit
 rm -f ~/.bashrc
 ./install-config.sh ./install-dotfiles.sh
 
+flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+
 flatpak_install() {
     remote=$1
     app=$2
