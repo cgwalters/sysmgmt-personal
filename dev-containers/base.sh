@@ -101,6 +101,8 @@ enabled_metadata=1
 EOF
     curl https://raw.githubusercontent.com/coreos/coreos-assembler/master/src/deps.txt | \
         grep -v '^#' | xargs yum -y install
+    yum -y install dnf-utils
+    echo -e '[fahc]\nmetadata_expire=1m\nbaseurl=https://ci.centos.org/artifacts/sig-atomic/fahc/rdgo/build/\ngpgcheck=0\n' > /etc/yum.repos.d/fahc.repo
 fi
 yum clean all && rm /var/cache/{dnf,yum} -rf
 
