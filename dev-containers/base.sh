@@ -61,9 +61,9 @@ case "${OS_ID}-${OS_VER}" in
         (cd /etc/yum.repos.d && curl -L -O https://copr.fedorainfracloud.org/coprs/walters/walters-ws-misc/repo/epel-7/walters-walters-ws-misc-epel-7.repo)
         ;;
 esac
-case "${OS_ID}-${OS_VER}" in
-    rhel-7.*) yum -y install rhpkg;;
-esac
+if [ "${OS_ID}" = rhel ]; then
+    yum -y install rhpkg
+fi
 
 pkgs="dumb-init bash-completion tmux sudo \
      redhat-rpm-config make \
@@ -77,6 +77,7 @@ if test "${OS_ID}" = fedora; then
     pkgs="$pkgs parallel vagrant-libvirt ansible"
     pkgs="$pkgs "$(echo ostree{,-grub2} rpm-ostree)
     pkgs="$pkgs awscli"
+    pkgs="$pkgs fish"
 fi
 if ! test -x /usr/bin/dnf; then
     pkgs="$pkgs yum-utils"
@@ -84,7 +85,11 @@ fi
 yum -y install $pkgs
 ${pkg_builddep} -y glib2 systemd kernel
 if test "${OS_ID}" = fedora; then
-    ${pkg_builddep} -y ostree rpm-ostree origin
+    ${pkg_builddep} -y ostree origin
+    if test "${OS_VER}" = 29; then
+        # Something going wrong with rust-packaging BR in f30
+        ${pkg_builddep} -y rpm-ostree
+    fi
     # enable `dustymabe/ignition` copr
 	# pulled from https://copr.fedorainfracloud.org/coprs/dustymabe/ignition/repo/fedora-28/dustymabe-ignition-fedora-28.repo
     cat > /etc/yum.repos.d/dustymabe-ignition-fedora-28.repo <<'EOF'
