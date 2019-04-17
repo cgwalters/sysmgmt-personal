@@ -3,7 +3,7 @@ set -xeuo pipefail
 base=$1
 prefix=$2
 tag=$3
-ctr=$(buildah from ${base})
+ctr=$(buildah from --net=host ${base})
 cleanup () {
     buildah rm ${ctr} || true
 }

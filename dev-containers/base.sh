@@ -90,6 +90,7 @@ if test "${OS_ID}" = fedora; then
         # Something going wrong with rust-packaging BR in f30
         ${pkg_builddep} -y rpm-ostree
     fi
+    ${pkg_builddep} -y libdnf
     # enable `dustymabe/ignition` copr
 	# pulled from https://copr.fedorainfracloud.org/coprs/dustymabe/ignition/repo/fedora-28/dustymabe-ignition-fedora-28.repo
     cat > /etc/yum.repos.d/dustymabe-ignition-fedora-28.repo <<'EOF'
@@ -114,6 +115,9 @@ yum clean all && rm /var/cache/{dnf,yum} -rf
 if [ -f /etc/mock/site-defaults.cfg ]; then
     echo "config_opts['use_nspawn'] = False" >> /etc/mock/site-defaults.cfg
 fi
+
+rm /var/lib/containers/* -rf
+ln -sr /srv/containers-storage /var/lib/containers/storage
 
 useradd walters -G wheel
 echo '%wheel ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers.d/wheel-nopasswd
