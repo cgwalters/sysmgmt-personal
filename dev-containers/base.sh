@@ -3,29 +3,6 @@ set -xeuo pipefail
 
 dn=$(cd $(dirname $0) && pwd)
 
-# Convert to ostree convention
-move_and_link() {
-    local src=$1
-    local dest=${2}
-    mv ${src} ${dest}
-    ln -sr ${dest} ${src}
-}
-redirect_var() {
-    local src=$1
-    local dest=${2:-${src}}
-    move_and_link /${src} /var/${dest}
-}
-redirect_var root roothome
-for x in mnt srv home; do
-    redirect_var ${x}
-done
-mv /usr/local /var/usrlocal && ln -sr /var/usrlocal /usr/local
-if test -d /var/lib/rpm; then
-    mkdir -p /usr/lib/sysimage
-    mv /var/lib/rpm /usr/lib/sysimage/rpm && ln -sr /usr/lib/sysimage/rpm /var/lib/rpm
-    ln -sr /usr/lib/sysimage/rpm /usr/share/rpm
-fi
-
 # https://pagure.io/fedora-kickstarts/blob/a8e3bf46817ca30f0253b025fcd829a99b1eb708/f/fedora-docker-base.ks#_22
 for f in /etc/dnf/dnf.conf /etc/yum.conf; do
     if test -f ${f}; then
@@ -64,6 +41,9 @@ esac
 if [ "${OS_ID}" = rhel ]; then
     yum -y install rhpkg
 fi
+
+rpm --import https://packages.microsoft.com/keys/microsoft.asc
+sh -c 'echo -e "[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" > /etc/yum.repos.d/vscode.repo'
 
 pkgs="dumb-init bash-completion tmux sudo \
      redhat-rpm-config make \
@@ -115,14 +95,3 @@ yum clean all && rm /var/cache/{dnf,yum} -rf
 if [ -f /etc/mock/site-defaults.cfg ]; then
     echo "config_opts['use_nspawn'] = False" >> /etc/mock/site-defaults.cfg
 fi
-
-rm /var/lib/containers/* -rf
-ln -sr /srv/containers-storage /var/lib/containers/storage
-
-useradd walters -G wheel
-echo '%wheel ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers.d/wheel-nopasswd
-if rpm -q mock 2>/dev/null; then
-    usermod -a -G mock walters
-fi
-runuser -u walters /usr/lib/container/user.sh
-cp -f /home/walters/.bashrc /root
