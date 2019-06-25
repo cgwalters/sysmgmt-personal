@@ -51,7 +51,7 @@ if test "${OS_ID}" = fedora; then
     pkgs="$pkgs jq gcc origin-clients standard-test-roles fedpkg mock awscli git-evtag cargo golang"
     pkgs="$pkgs parallel vagrant-libvirt ansible"
     pkgs="$pkgs "$(echo ostree{,-grub2} rpm-ostree)
-    pkgs="$pkgs awscli dnf-utils"
+    pkgs="$pkgs awscli dnf-utils bind-utils"
     pkgs="$pkgs fish ripgrep xsel git-annex"
     # Some base fonts...TODO fix toolbox to pull fonts from the host like flatpak
     pkgs="$pkgs dejavu-sans-mono-fonts dejavu-sans-fonts google-noto-emoji-color-fonts"
