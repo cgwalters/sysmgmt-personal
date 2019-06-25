@@ -32,32 +32,29 @@ fi
 case "${OS_ID}-${OS_VER}" in
     rhel-7.*|centos-7) yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm;;
 esac
-case "${OS_ID}-${OS_VER}" in
-    rhel-*|centos-*)
-        # for dumb-init
-        (cd /etc/yum.repos.d && curl -L -O https://copr.fedorainfracloud.org/coprs/walters/walters-ws-misc/repo/epel-7/walters-walters-ws-misc-epel-7.repo)
-        ;;
-esac
 if [ "${OS_ID}" = rhel ]; then
     yum -y install rhpkg
 fi
 
-rpm --import https://packages.microsoft.com/keys/microsoft.asc
-sh -c 'echo -e "[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" > /etc/yum.repos.d/vscode.repo'
-
-pkgs="dumb-init bash-completion tmux sudo \
+pkgs="bash-completion tmux sudo \
      redhat-rpm-config make \
      libguestfs-tools strace libguestfs-xfs \
      virt-install curl git kernel rsync \
      gdb selinux-policy-targeted
      createrepo_c libvirt-devel"
 if test "${OS_ID}" = fedora; then
+    # VS code
+    rpm --import https://packages.microsoft.com/keys/microsoft.asc
+    sh -c 'echo -e "[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" > /etc/yum.repos.d/vscode.repo'
+    yum -y install code
     pkgs="$pkgs "$(echo {python3-,}dnf-plugins-core)
     pkgs="$pkgs jq gcc origin-clients standard-test-roles fedpkg mock awscli git-evtag cargo golang"
     pkgs="$pkgs parallel vagrant-libvirt ansible"
     pkgs="$pkgs "$(echo ostree{,-grub2} rpm-ostree)
-    pkgs="$pkgs awscli"
-    pkgs="$pkgs fish"
+    pkgs="$pkgs awscli dnf-utils"
+    pkgs="$pkgs fish ripgrep xsel git-annex"
+    # Some base fonts...TODO fix toolbox to pull fonts from the host like flatpak
+    pkgs="$pkgs dejavu-sans-mono-fonts dejavu-sans-fonts google-noto-emoji-color-fonts"
 fi
 if ! test -x /usr/bin/dnf; then
     pkgs="$pkgs yum-utils"
@@ -65,30 +62,22 @@ fi
 yum -y install $pkgs
 ${pkg_builddep} -y glib2 systemd kernel
 if test "${OS_ID}" = fedora; then
-    ${pkg_builddep} -y ostree origin
-    if test "${OS_VER}" = 29; then
-        # Something going wrong with rust-packaging BR in f30
-        ${pkg_builddep} -y rpm-ostree
-    fi
-    ${pkg_builddep} -y libdnf
-    # enable `dustymabe/ignition` copr
-	# pulled from https://copr.fedorainfracloud.org/coprs/dustymabe/ignition/repo/fedora-28/dustymabe-ignition-fedora-28.repo
-    cat > /etc/yum.repos.d/dustymabe-ignition-fedora-28.repo <<'EOF'
-[dustymabe-ignition]
-name=Copr repo for ignition owned by dustymabe
-baseurl=https://copr-be.cloud.fedoraproject.org/results/dustymabe/ignition/fedora-$releasever-$basearch/
-type=rpm-md
-skip_if_unavailable=True
-gpgcheck=1
-gpgkey=https://copr-be.cloud.fedoraproject.org/results/dustymabe/ignition/pubkey.gpg
-repo_gpgcheck=0
+    ${pkg_builddep} -y ostree origin rpm-ostree libdnf
+    # Stuff for cosa
+    cat > /etc/yum.repos.d/fedora-coreos-pool.repo <<'EOF'
+[fedora-coreos-pool]
+name=Fedora coreos pool repository - $basearch
+baseurl=https://kojipkgs.fedoraproject.org/repos-dist/coreos-pool/latest/$basearch/
 enabled=1
-enabled_metadata=1
+repo_gpgcheck=0
+type=rpm-md
+gpgcheck=1
+skip_if_unavailable=False
 EOF
     curl https://raw.githubusercontent.com/coreos/coreos-assembler/master/src/deps.txt | \
         grep -v '^#' | xargs yum -y install
-    yum -y install dnf-utils
-    echo -e '[fahc]\nmetadata_expire=1m\nbaseurl=https://ci.centos.org/artifacts/sig-atomic/fahc/rdgo/build/\ngpgcheck=0\n' > /etc/yum.repos.d/fahc.repo
+    # Extra arch specific bits
+    yum -y install shim-x64 grub2-efi-x64
 fi
 yum clean all && rm /var/cache/{dnf,yum} -rf
 
