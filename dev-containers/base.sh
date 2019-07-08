@@ -77,7 +77,7 @@ EOF
     curl https://raw.githubusercontent.com/coreos/coreos-assembler/master/src/deps.txt | \
         grep -v '^#' | xargs yum -y install
     # Extra arch specific bits
-    yum -y install shim-x64 grub2-efi-x64
+    yum -y install shim-x64 grub2-efi-x64{,-modules}
 fi
 yum clean all && rm /var/cache/{dnf,yum} -rf
 
