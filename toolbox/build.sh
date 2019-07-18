@@ -20,6 +20,17 @@ override_repo="/usr/lib/container/repos/${OS_ID}-${OS_VER}.repo"
 if test -f "${override_repo}"; then
     cp --reflink=auto "${override_repo}" /etc/yum.repos.d
 fi
+if test "${OS_ID}" = fedora; then
+    cat > /etc/yum.repos.d/fedora-coreos-pool.repo <<'EOF'
+[fedora-coreos-pool]
+name=Fedora coreos pool repository - $basearch
+baseurl=https://kojipkgs.fedoraproject.org/repos-dist/coreos-pool/latest/$basearch/
+enabled=1
+repo_gpgcheck=0
+type=rpm-md
+gpgcheck=1
+skip_if_unavailable=False
+EOF
 
 yum -y update
 
@@ -64,20 +75,12 @@ ${pkg_builddep} -y glib2 systemd kernel
 if test "${OS_ID}" = fedora; then
     ${pkg_builddep} -y ostree origin rpm-ostree libdnf
     # Stuff for cosa
-    cat > /etc/yum.repos.d/fedora-coreos-pool.repo <<'EOF'
-[fedora-coreos-pool]
-name=Fedora coreos pool repository - $basearch
-baseurl=https://kojipkgs.fedoraproject.org/repos-dist/coreos-pool/latest/$basearch/
-enabled=1
-repo_gpgcheck=0
-type=rpm-md
-gpgcheck=1
-skip_if_unavailable=False
-EOF
     curl https://raw.githubusercontent.com/coreos/coreos-assembler/master/src/deps.txt | \
         grep -v '^#' | xargs yum -y install
     # Extra arch specific bits
     yum -y install shim-x64 grub2-efi-x64{,-modules}
+    # Done in cosa build for supermin
+    chmod -R a+rX /boot/efi
 fi
 yum clean all && rm /var/cache/{dnf,yum} -rf
 
