@@ -31,6 +31,11 @@ type=rpm-md
 gpgcheck=1
 skip_if_unavailable=False
 EOF
+    rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-fedora-29-primary
+    # VS code
+    rpm --import https://packages.microsoft.com/keys/microsoft.asc
+    sh -c 'echo -e "[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" > /etc/yum.repos.d/vscode.repo'
+fi
 
 yum -y update
 
@@ -47,36 +52,30 @@ if [ "${OS_ID}" = rhel ]; then
     yum -y install rhpkg
 fi
 
-pkgs="bash-completion tmux sudo \
+yum -y install bash-completion tmux sudo \
      redhat-rpm-config make \
      libguestfs-tools strace libguestfs-xfs \
      virt-install curl git kernel rsync \
-     gdb selinux-policy-targeted
-     createrepo_c libvirt-devel"
+     gdb selinux-policy-targeted \
+     createrepo_c libvirt-devel
 if test "${OS_ID}" = fedora; then
-    # VS code
-    rpm --import https://packages.microsoft.com/keys/microsoft.asc
-    sh -c 'echo -e "[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" > /etc/yum.repos.d/vscode.repo'
+    # See repos above
     yum -y install code
-    pkgs="$pkgs "$(echo {python3-,}dnf-plugins-core)
-    pkgs="$pkgs jq gcc clang origin-clients standard-test-roles fedpkg mock awscli git-evtag cargo golang"
-    pkgs="$pkgs parallel vagrant-libvirt ansible"
-    pkgs="$pkgs "$(echo ostree{,-grub2} rpm-ostree)
-    pkgs="$pkgs awscli dnf-utils bind-utils bcc bpftrace bpf-tools"
-    pkgs="$pkgs fish ripgrep fd-find xsel git-annex"
+    # General development
+    yum -y install {python3-,}dnf-plugins-core \
+           jq gcc clang origin-clients standard-test-roles fedpkg mock awscli git-evtag cargo golang \
+           parallel vagrant-libvirt ansible \
+           ostree{,-grub2} rpm-ostree \
+           awscli dnf-utils bind-utils bcc bpftrace bcc-tools perf \
+           fish ripgrep fd-find xsel git-annex
     # Some base fonts...TODO fix toolbox to pull fonts from the host like flatpak
-    pkgs="$pkgs dejavu-sans-mono-fonts dejavu-sans-fonts google-noto-emoji-color-fonts"
-fi
-if ! test -x /usr/bin/dnf; then
-    pkgs="$pkgs yum-utils"
-fi
-yum -y install $pkgs
-${pkg_builddep} -y glib2 systemd kernel
-# Dependencies for rr https://github.com/mozilla/rr/wiki/Building-And-Installing
-yum -y install ccache cmake make gcc gcc-c++ gdb libgcc libgcc.i686 \
+    yum -y install dejavu-sans-mono-fonts dejavu-sans-fonts google-noto-emoji-color-fonts
+
+    # Dependencies for rr https://github.com/mozilla/rr/wiki/Building-And-Installing
+    yum -y install ccache cmake make gcc gcc-c++ gdb libgcc libgcc.i686 \
                glibc-devel glibc-devel.i686 libstdc++-devel libstdc++-devel.i686 \
                python3-pexpect man-pages ninja-build capnproto capnproto-libs capnproto-devel
-if test "${OS_ID}" = fedora; then
+
     ${pkg_builddep} -y ostree origin rpm-ostree libdnf
     # Stuff for cosa
     curl https://raw.githubusercontent.com/coreos/coreos-assembler/master/src/deps.txt | \
@@ -86,6 +85,11 @@ if test "${OS_ID}" = fedora; then
     # Done in cosa build for supermin
     chmod -R a+rX /boot/efi
 fi
+if ! test -x /usr/bin/dnf; then
+    yum -y install yum-utils
+fi
+${pkg_builddep} -y glib2 systemd kernel
+
 yum clean all && rm /var/cache/{dnf,yum} -rf
 
 if [ -f /etc/mock/site-defaults.cfg ]; then
