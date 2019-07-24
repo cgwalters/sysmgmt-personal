@@ -59,10 +59,10 @@ if test "${OS_ID}" = fedora; then
     sh -c 'echo -e "[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" > /etc/yum.repos.d/vscode.repo'
     yum -y install code
     pkgs="$pkgs "$(echo {python3-,}dnf-plugins-core)
-    pkgs="$pkgs jq gcc origin-clients standard-test-roles fedpkg mock awscli git-evtag cargo golang"
+    pkgs="$pkgs jq gcc clang origin-clients standard-test-roles fedpkg mock awscli git-evtag cargo golang"
     pkgs="$pkgs parallel vagrant-libvirt ansible"
     pkgs="$pkgs "$(echo ostree{,-grub2} rpm-ostree)
-    pkgs="$pkgs awscli dnf-utils bind-utils bcc"
+    pkgs="$pkgs awscli dnf-utils bind-utils bcc bpftrace bpf-tools"
     pkgs="$pkgs fish ripgrep fd-find xsel git-annex"
     # Some base fonts...TODO fix toolbox to pull fonts from the host like flatpak
     pkgs="$pkgs dejavu-sans-mono-fonts dejavu-sans-fonts google-noto-emoji-color-fonts"
@@ -72,6 +72,10 @@ if ! test -x /usr/bin/dnf; then
 fi
 yum -y install $pkgs
 ${pkg_builddep} -y glib2 systemd kernel
+# Dependencies for rr https://github.com/mozilla/rr/wiki/Building-And-Installing
+yum -y install ccache cmake make gcc gcc-c++ gdb libgcc libgcc.i686 \
+               glibc-devel glibc-devel.i686 libstdc++-devel libstdc++-devel.i686 \
+               python3-pexpect man-pages ninja-build capnproto capnproto-libs capnproto-devel
 if test "${OS_ID}" = fedora; then
     ${pkg_builddep} -y ostree origin rpm-ostree libdnf
     # Stuff for cosa
