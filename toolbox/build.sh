@@ -115,3 +115,17 @@ yum clean all && rm /var/cache/{dnf,yum} -rf
 if [ -f /etc/mock/site-defaults.cfg ]; then
     echo "config_opts['use_nspawn'] = False" >> /etc/mock/site-defaults.cfg
 fi
+
+# prebuilt binaries in the container
+mkdir -p /container/bin
+
+git clone https://github.com/cgwalters/coretoolbox
+cd coretoolbox
+cargo build --release
+mv target/release/coretoolbox /container/bin
+cd -
+rm coretoolbox -rf
+
+# pre-downloaded source
+mkdir -p /container/src
+git clone https://github.com/cgwalters/homegit
