@@ -21,20 +21,18 @@ if test -f "${override_repo}"; then
     cp --reflink=auto "${override_repo}" /etc/yum.repos.d
 fi
 if test "${OS_ID}" = fedora; then
-    rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-fedora-${OS_VER}-primary
-    rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-fedora-$((${OS_VER} - 1))-primary
+    rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-fedora-*-primary
     rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-fedora-modularity
     cat > /etc/yum.repos.d/fedora-coreos-pool.repo <<'EOF'
 [fedora-coreos-pool]
 name=Fedora coreos pool repository - $basearch
 baseurl=https://kojipkgs.fedoraproject.org/repos-dist/coreos-pool/latest/$basearch/
-enabled=1
+enabled=0
 repo_gpgcheck=0
 type=rpm-md
 gpgcheck=1
 skip_if_unavailable=False
 EOF
-    rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-fedora-29-primary
     # VS code
     rpm --import https://packages.microsoft.com/keys/microsoft.asc
     sh -c 'echo -e "[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" > /etc/yum.repos.d/vscode.repo'
