@@ -95,7 +95,7 @@ if test "${OS_ID}" = fedora; then
                glibc-devel glibc-devel.i686 libstdc++-devel libstdc++-devel.i686 \
                python3-pexpect man-pages ninja-build capnproto capnproto-libs capnproto-devel
 
-    pkg_builddep -y ostree origin rpm-ostree libdnf
+    pkg_builddep -y ostree rpm-ostree
     # Stuff for cosa
     yum_install $(curl https://raw.githubusercontent.com/coreos/coreos-assembler/master/src/deps.txt | grep -v '^#')
     # Extra arch specific bits
