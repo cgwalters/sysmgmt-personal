@@ -1,0 +1,42 @@
+variant: fcos
+version: 1.1.0
+storage:
+  trees:
+    - local: etc
+      path: /etc
+  files:
+    - path: /etc/containers/registries.conf
+      overwrite: true
+      mode: 0644
+      contents:
+        inline: |
+          # Disable short names, see https://bugzilla.redhat.com/show_bug.cgi?id=1434897#c7
+          [registries.search]
+          registries = []
+  disks:
+    - device: /dev/vda
+      partitions:
+        - label: var
+          # Our /var fills up the rest of the disk
+          size_mib: 0
+          # Leave enough space for
+          start_mib: 8192
+          number: 0
+  filesystems:
+    - path: /var
+      device: /dev/disk/by-partlabel/var
+      format: xfs
+      wipe_filesystem: true
+      label: var
+systemd:
+  units:
+    - name: var.mount
+      enabled: true
+      contents: |
+        [Unit]
+        Before=local-fs.target
+        [Mount]
+        Where=/var
+        What=/dev/disk/by-partlabel/var
+        [Install]
+        WantedBy=local-fs.target

@@ -1,0 +1,6 @@
+# More secure ssh defaults: https://stribika.github.io/2015/01/04/secure-secure-shell.html
+KexAlgorithms curve25519-sha256@libssh.org
+Ciphers chacha20-poly1305@openssh.com
+MACs hmac-sha2-512-etm@openssh.com
+GSSAPIAuthentication no
+PasswordAuthentication no
