@@ -95,11 +95,12 @@ if test "${OS_ID}" = fedora; then
                glibc-devel glibc-devel.i686 libstdc++-devel libstdc++-devel.i686 \
                python3-pexpect man-pages ninja-build capnproto capnproto-libs capnproto-devel
 
-    pkg_builddep -y ostree rpm-ostree
+    pkg_builddep -y ostree rpm-ostree podman buildah
     # Stuff for cosa
     yum_install $(curl https://raw.githubusercontent.com/coreos/coreos-assembler/master/src/deps.txt | grep -v '^#')
     # Extra arch specific bits
     yum_install shim-x64 grub2-efi-x64{,-modules}
+    yum_install bootupd
     # Done in cosa build for supermin
     chmod -R a+rX /boot/efi
 fi
