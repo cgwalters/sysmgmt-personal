@@ -3,6 +3,10 @@ set -xeuo pipefail
 
 dn=$(cd $(dirname $0) && pwd)
 
+# First, install rust in /usr
+# https://github.com/rust-lang/rustup/issues/2383
+curl https://sh.rustup.rs -sSf | sudo env RUSTUP_HOME=/usr/rust/rustup CARGO_HOME=/usr/rust/cargo sh -s -- --default-toolchain stable --profile default --no-modify-path -y
+
 # https://pagure.io/fedora-kickstarts/blob/a8e3bf46817ca30f0253b025fcd829a99b1eb708/f/fedora-docker-base.ks#_22
 for f in /etc/dnf/dnf.conf /etc/yum.conf; do
     if test -f ${f}; then
@@ -33,9 +37,6 @@ type=rpm-md
 gpgcheck=1
 skip_if_unavailable=False
 EOF
-    # VS code
-    rpm --import https://packages.microsoft.com/keys/microsoft.asc
-    sh -c 'echo -e "[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" > /etc/yum.repos.d/vscode.repo'
 fi
 
 yum_retry() {
@@ -66,53 +67,20 @@ pkg_builddep() {
 
 case "${OS_ID}-${OS_VER}" in
     rhel-7.*|centos-7) yum_install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm;;
+    rhel-8.*) yum_install dnf install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm ;;
 esac
 if [ "${OS_ID}" = rhel ]; then
     yum_install rhpkg
 fi
 
-yum_install bash-completion tmux sudo \
+yum_install passwd sudo bash-completion tmux sudo \
      redhat-rpm-config make \
      libguestfs-tools strace libguestfs-xfs \
      virt-install curl git kernel rsync \
      gdb selinux-policy-targeted \
-     createrepo_c libvirt-devel
-if test "${OS_ID}" = fedora; then
-    # See repos above
-    yum_install code
-    # General development
-    yum_install {python3-,}dnf-plugins-core \
-           jq gcc clang origin-clients standard-test-roles fedpkg mock awscli git-evtag cargo golang \
-           parallel vagrant-libvirt ansible \
-           ostree{,-grub2} rpm-ostree \
-           awscli dnf-utils bind-utils bcc bpftrace bcc-tools perf \
-           fish ripgrep fd-find xsel git-annex
-    # Some base fonts...TODO fix toolbox to pull fonts from the host like flatpak
-    yum_install dejavu-sans-mono-fonts dejavu-sans-fonts google-noto-emoji-color-fonts
-
-    # Dependencies for rr https://github.com/mozilla/rr/wiki/Building-And-Installing
-    yum_install ccache cmake make gcc gcc-c++ gdb libgcc libgcc.i686 \
-               glibc-devel glibc-devel.i686 libstdc++-devel libstdc++-devel.i686 \
-               python3-pexpect man-pages ninja-build capnproto capnproto-libs capnproto-devel
-
-    pkg_builddep -y ostree rpm-ostree podman buildah
-    # Stuff for cosa
-    yum_install $(curl https://raw.githubusercontent.com/coreos/coreos-assembler/master/src/deps.txt | grep -v '^#')
-    # Extra arch specific bits
-    yum_install shim-x64 grub2-efi-x64{,-modules}
-    yum_install bootupd
-    # Done in cosa build for supermin
-    chmod -R a+rX /boot/efi
-fi
+     createrepo_c
 if ! test -x /usr/bin/dnf; then
     yum_install yum-utils
-fi
-pkg_builddep -y glib2 systemd kernel
-
-yum clean all && rm /var/cache/{dnf,yum} -rf
-
-if [ -f /etc/mock/site-defaults.cfg ]; then
-    echo "config_opts['use_nspawn'] = False" >> /etc/mock/site-defaults.cfg
 fi
 
 # pre-downloaded source

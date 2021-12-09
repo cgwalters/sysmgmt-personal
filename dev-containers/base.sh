@@ -79,7 +79,6 @@ EOF
     # Extra arch specific bits
     yum -y install shim-x64 grub2-efi-x64{,-modules}
 fi
-yum clean all && rm /var/cache/{dnf,yum} -rf
 
 if [ -f /etc/mock/site-defaults.cfg ]; then
     echo "config_opts['use_nspawn'] = False" >> /etc/mock/site-defaults.cfg

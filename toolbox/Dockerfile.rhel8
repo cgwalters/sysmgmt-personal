@@ -1,0 +1,7 @@
+FROM registry.access.redhat.com/ubi8/ubi:latest
+LABEL com.coreos.toolbox=true
+ADD rhel8.repo /etc/yum.repos.d
+RUN cp /run/host/etc/pki/ca-trust/source/anchors/* /etc/pki/ca-trust/source/anchors && update-ca-trust
+RUN rm -f /etc/yum.repos.d/ubi.repo
+ADD build.sh /tmp
+RUN /tmp/build.sh && rm -f /tmp/build.sh && yum clean all
